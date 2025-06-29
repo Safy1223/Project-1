@@ -22,7 +22,6 @@ export default function TodoList() {
 
   /// ===== TodoComplete Table===///
   async function handleCheckCilik(index, isCompleted) {
-    alert(index);
     const { data, error } = await supabase
       .from("Todos")
       .update({ isCompleted: !isCompleted })

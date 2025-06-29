@@ -84,12 +84,9 @@ export function Todo({ item, CompleteTodo, DeleteTodo, UpdateTodo }) {
                   bgcolor: "primary.light",
                 },
               }}
-              onClick={
-                // handleCheckCilik(item.id, item.isCompleted);
-                () => {
-                  CompleteTodo(item.id, item.isCompleted);
-                }
-              }
+              onClick={() => {
+                CompleteTodo(item.id, item.isCompleted);
+              }}
             >
               {" "}
               <CheckIcon />
@@ -104,12 +101,9 @@ export function Todo({ item, CompleteTodo, DeleteTodo, UpdateTodo }) {
                 },
               }}
               color="primary"
-              onClick={
-                // handleCheckCilik(item.id, item.isCompleted);
-                () => {
-                  UpdateTodo(item.id);
-                }
-              }
+              onClick={() => {
+                UpdateTodo(item.id);
+              }}
             >
               {" "}
               <EditIcon />
