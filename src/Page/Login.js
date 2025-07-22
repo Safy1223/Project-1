@@ -1,124 +1,193 @@
-import Typography from "@mui/material/Typography";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import Input from "@mui/material/Input";
-import Button from "@mui/material/Button";
-import { Link } from "react-router-dom";
-import { Card } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
+// src/Page/Login.js
+
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import supabase from "../config/supabaseClient";
+
+// استيراد مكونات Material-UI
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
+  Stack,
+  Avatar,
+  Divider, // لإضافة خط فاصل
+} from "@mui/material";
+
+// استيراد الأيقونات
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import InputLabel from "@mui/material/InputLabel";
-import { useEffect, useState } from "react";
-import supabase from "../config/supabaseClient";
-import { useNavigate } from "react-router-dom";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 
 export default function Login() {
-  const [inputInfo, setInputInfo] = useState({
-    email: "",
-    password: "",
-  });
   const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  async function handleSignIn() {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: inputInfo.email,
-      password: inputInfo.password,
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email: email,
+      password: password,
     });
+
     if (error) {
-      alert("Invalid login information");
+      setError("Invalid email or password. Please try again.");
+      setLoading(false);
     } else {
       navigate("/TodoList");
     }
-  }
+  };
 
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleClickShowPassword = () => setShowPassword((show) => !show);
   return (
-    <>
-      <Card
+    <Box sx={{ bgcolor: "#f4f6f8", minHeight: "100vh" }}>
+      <Container
+        component="main"
+        maxWidth="xs"
         sx={{
-          background: "#ffffff",
-          color: "black",
-          boxShadow: 8,
-          width: 400,
-          mx: "auto", // margin left & right
-          my: 15, // margin top & bottom
-          py: 5, // padding top & bottom
-          px: 2, // padding left & right
           display: "flex",
           flexDirection: "column",
-          gap: 3,
-          borderRadius: "12px",
+          justifyContent: "center",
+          minHeight: "100vh",
+          py: 4,
         }}
-        variant="outlined"
       >
-        <div>
-          <Typography variant="h4">
-            <b>Welcome!</b>
-          </Typography>
-          <Typography level="body-sm">Sign in to continue.</Typography>
-        </div>
-        <FormControl>
-          <InputLabel htmlFor="standard-adornment-password">Email</InputLabel>
-          <Input
-            // html input attribute
-            name="email"
-            type="email"
-            value={inputInfo.email}
-            onChange={(event) => {
-              setInputInfo({ ...inputInfo, email: event.target.value });
-            }}
-          />
-        </FormControl>
-        <FormControl>
-          <InputLabel htmlFor="standard-adornment-password">
-            Confirm Password
-          </InputLabel>
-          <Input
-            id="standard-adornment-password"
-            type={showPassword ? "text" : "password"}
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label={
-                    showPassword ? "hide the password" : "display the password"
-                  }
-                  onClick={handleClickShowPassword}
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            }
-            value={inputInfo.password}
-            onChange={(event) => {
-              setInputInfo({ ...inputInfo, password: event.target.value });
-            }}
-          />
-        </FormControl>
-        <Button
+        <Paper
+          elevation={6}
           sx={{
-            mt: 1,
-            fontSize: "15px " /* margin top */,
-            bgcolor: "primary",
+            p: { xs: 3, sm: 4 },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            borderRadius: 2,
           }}
-          variant="contained"
-          onClick={handleSignIn}
         >
-          Log in
-        </Button>
-        <Typography>
-          Don&apos;t have an account?
-          <Link
-            to="/SignUp"
-            sx={{ marginLeft: "5px", fontSize: "md", alignSelf: "felx-end" }}
+          <Avatar sx={{ m: 1, bgcolor: "primary.main", width: 56, height: 56 }}>
+            <LockOutlinedIcon fontSize="large" />
+          </Avatar>
+
+          <Typography
+            component="h1"
+            variant="h5"
+            fontWeight="bold"
+            sx={{ mt: 1 }}
           >
-            Sign Up
-          </Link>
-        </Typography>
-      </Card>
-    </>
+            Sign In
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Welcome back! Please enter your details.
+          </Typography>
+
+          <Box
+            component="form"
+            onSubmit={handleSignIn}
+            noValidate
+            sx={{ width: "100%" }}
+          >
+            <Stack spacing={2}>
+              <TextField
+                required
+                fullWidth
+                id="email"
+                label="Email Address"
+                name="email"
+                autoComplete="email"
+                autoFocus
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                required
+                fullWidth
+                name="password"
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                id="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            </Stack>
+
+            {error && (
+              <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+                {error}
+              </Typography>
+            )}
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                fontSize: "1rem",
+                fontWeight: "bold",
+                boxShadow: "0 4px 14px 0 rgba(0, 118, 255, 0.39)",
+              }}
+              disabled={loading}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "Sign In"
+              )}
+            </Button>
+
+            <Divider sx={{ my: 1 }}>
+              <Typography variant="body2" color="text.secondary">
+                OR
+              </Typography>
+            </Divider>
+
+            <Typography
+              variant="body2"
+              align="center"
+              color="text.secondary"
+              sx={{ mt: 1 }}
+            >
+              Don't have an account?{" "}
+              <Link
+                to="/SignUp"
+                style={{
+                  textDecoration: "none",
+                  color: "#1976d2",
+                  fontWeight: "bold",
+                }}
+              >
+                Sign Up
+              </Link>
+            </Typography>
+          </Box>
+        </Paper>
+      </Container>
+    </Box>
   );
 }

@@ -1,108 +1,136 @@
-import * as React from "react";
-import Button from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
-import { Card, Stack, TextField } from "@mui/material";
-import supabase from "../config/supabaseClient";
 import { useState, useContext } from "react";
+import supabase from "../config/supabaseClient";
 import { TodosContext } from "../context/TodoContext";
-import { useTranslation } from "react-i18next";
-export default function AddTodos() {
-  const { t, i18n } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const [snack, setSnack] = useState({ message: "", severity: "success" });
+import {
+  Button,
+  Stack,
+  TextField,
+  Snackbar,
+  Alert,
+  Box,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
-  const handleClose = (event, reason) => {
+import { useTranslation } from "react-i18next";
+
+export default function AddTodos() {
+  const { t } = useTranslation();
+  const { arrayTodo, setArrayTodo, allTodos, setAllTodos } =
+    useContext(TodosContext);
+  const [title, setTitle] = useState("");
+  const [details, setDetails] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [notification, setNotification] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  ///----- Add Todo -------/////
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!title.trim()) {
+      setNotification({
+        message: t("Title is required"),
+        severity: "error",
+        open: true,
+      });
+      return;
+    }
+    setLoading(true);
+    const { data: newTodos, error } = await supabase
+      .from("Todos")
+      .insert([{ Title: title, Details: details, isCompleted: false }])
+      .select();
+    setLoading(false);
+    if (error) {
+      setNotification({
+        message: t("Error adding task"),
+        severity: "error",
+        open: true,
+      });
+    } else {
+      setNotification({
+        message: t("Task added successfully"),
+        severity: "success",
+        open: true,
+      });
+      // تحديث الحالة في السياق (Context)
+      const updatedArray = [...arrayTodo, ...newTodos];
+      setArrayTodo(updatedArray);
+      setAllTodos(updatedArray);
+      // إعادة تعيين حقول الإدخال
+      setTitle("");
+      setDetails("");
+    }
+  };
+  const handleCloseNotification = (event, reason) => {
+    //منع الإغلاق إذا كان المستخدم قد نقر خارج الإشعار، مما يعني أنه ربما كان يريد إبقاءه مفتوحًا.
     if (reason === "clickaway") {
       return;
     }
+    setNotification({ ...notification, open: false });
+  };
 
-    setOpen(false);
-  };
-  ///----- Add Todo -------/////
-  const { arrayTodo, setArrayTodo, allTodos, setAllTodos } =
-    useContext(TodosContext);
-  const [AddNewTodos, setAddNewTodos] = useState({
-    Title: "",
-    Details: "",
-  });
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!AddNewTodos.Title.trim()) {
-      setSnack({ message: t("Address required"), severity: "error" });
-      setOpen(true);
-      return;
-    }
-    const { data: Todos, error } = await supabase
-      .from("Todos")
-      .insert([
-        {
-          Title: AddNewTodos.Title,
-          Details: AddNewTodos.Details,
-          isCompleted: false,
-        },
-      ])
-      .select();
-    if (error) {
-      setSnack({ message: t("Error while adding"), severity: "error" });
-      console.error(error);
-      setOpen(true);
-    } else {
-      setSnack({ message: t("Added successfully"), severity: "success" });
-      setArrayTodo([...arrayTodo, ...Todos]);
-      setAllTodos([...allTodos, ...Todos]);
-      setAddNewTodos({
-        Title: "",
-        Details: "",
-      });
-      setOpen(true);
-    }
-  };
   return (
-    <Card variant="outlined" sx={{ minWidth: 275, p: 2 }}>
-      <form onSubmit={handleSubmit}>
-        <Stack spacing={2}>
-          <TextField
-            label={t("Title")}
-            variant="outlined"
-            fullWidth
-            value={AddNewTodos.Title}
-            onChange={(e) =>
-              setAddNewTodos({ ...AddNewTodos, Title: e.target.value })
-            }
-          />
-          <TextField
-            label={t("Details")}
-            variant="outlined"
-            fullWidth
-            multiline
-            rows={3}
-            value={AddNewTodos.Details}
-            onChange={(e) =>
-              setAddNewTodos({ ...AddNewTodos, Details: e.target.value })
-            }
-          />
-          <Button
-            type="submit"
-            sx={{ fontSize: 22 }}
-            variant="contained"
-            color="primary"
-          >
-            {t("Add a new todo")}
-          </Button>
-        </Stack>
-      </form>
+    <Box component="form" onSubmit={handleSubmit}>
+      <Typography variant="h5" component="h3" gutterBottom fontWeight="bold">
+        {t("Add a New Task")}
+      </Typography>
+      <Stack spacing={2}>
+        <TextField
+          label={t("Task Title")}
+          variant="filled"
+          fullWidth
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          disabled={loading}
+        />
+        <TextField
+          label={t("Details")}
+          variant="filled"
+          fullWidth
+          multiline
+          rows={2}
+          value={details}
+          onChange={(e) => setDetails(e.target.value)}
+          disabled={loading}
+        />
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          size="large"
+          startIcon={
+            loading ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              <AddCircleOutlineIcon />
+            )
+          }
+          disabled={loading}
+        >
+          {loading ? t("Adding...") : t("Add Task")}
+        </Button>
+      </Stack>
 
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={4000}
+        onClose={handleCloseNotification}
+      >
         <Alert
-          onClose={handleClose}
-          severity={snack.severity}
+          onClose={handleCloseNotification}
+          severity={notification.severity}
           variant="filled"
           sx={{ width: "100%" }}
         >
-          {snack.message}
+          {notification.message}
         </Alert>
       </Snackbar>
-    </Card>
+    </Box>
   );
 }

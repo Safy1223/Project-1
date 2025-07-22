@@ -1,401 +1,306 @@
-import * as React from "react";
-import PropTypes from "prop-types";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import CssBaseline from "@mui/material/CssBaseline";
-import Divider from "@mui/material/Divider";
-import Drawer from "@mui/material/Drawer";
-import IconButton from "@mui/material/IconButton";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+// src/Page/SideNavigation.js
+
+import { useState, useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 import supabase from "../config/supabaseClient";
-import { Link } from "react-router-dom";
-//Icons
-import Person2SharpIcon from "@mui/icons-material/Person2Sharp";
+import { useTranslation } from "react-i18next";
+
+// MUI Components
+import {
+  AppBar,
+  Box,
+  CssBaseline,
+  Divider,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Toolbar,
+  Typography,
+  Button,
+  Avatar,
+  Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  CircularProgress,
+} from "@mui/material";
+
+// MUI Icons
+import MenuIcon from "@mui/icons-material/Menu";
+import HomeIcon from "@mui/icons-material/Home";
+import LanguageIcon from "@mui/icons-material/Language";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from "@mui/icons-material/Logout";
 import PasswordIcon from "@mui/icons-material/Password";
 import InfoIcon from "@mui/icons-material/Info";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import DoNotDisturbIcon from "@mui/icons-material/DoNotDisturb";
-import DensitySmallIcon from "@mui/icons-material/DensitySmall";
-import LogoutIcon from "@mui/icons-material/Logout";
-//Icons
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Outlet } from "react-router-dom";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
-import Dialog from "@mui/material/Dialog";
-import DialogTitle from "@mui/material/DialogTitle";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogActions from "@mui/material/DialogActions";
+const DRAWER_WIDTH = 250;
 
-import { TodosContext } from "../context/TodoContext";
-import { useContext } from "react";
+// ===================================================================
+// 1. Custom Hook to manage User Data and Authentication
+// ===================================================================
+const useAuth = () => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-import { useTranslation } from "react-i18next";
-import i18next from "i18next";
-import LanguageIcon from "@mui/icons-material/Language";
-import HomeIcon from "@mui/icons-material/Home";
-const drawerWidth = 240;
-
-function SideNavigation(props) {
-  ///--------Read Information User-------///
-  const [username, Setusername] = useState("");
-  const [userEmail, SetUserEmail] = useState("");
-  const Navigate = useNavigate();
   useEffect(() => {
     const fetchUser = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (user) {
-        Setusername(user.user_metadata.full_name);
-        SetUserEmail(user.email);
-      }
+      setUser(user);
+      setLoading(false);
     };
     fetchUser();
   }, []);
-  ///--------Read Information User-------///
 
-  //---------Logout-----/////
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      alert(error);
-    } else {
-      Navigate("/login");
-    }
+    await supabase.auth.signOut();
+    navigate("/login");
   };
 
-  //---------Logout-----/////
-
-  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
-
-  const handleUpdateClose = () => {
-    setShowUpdateDialog(false);
-  };
-
-  //---------Reset Password-----/////
-  const sendEmailToresetpassword = async (email) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "http://localhost:3000/resetPassword",
+  const sendResetPasswordEmail = async () => {
+    if (!user) return;
+    const { error } = await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: `${window.location.origin}/resetPassword`,
     });
     if (error) {
-      setShowUpdateDialog(false);
+      // You should use a toast notification here instead of alert
       alert(error.message);
     } else {
-      setShowUpdateDialog(false);
       alert("A password reset link has been sent to your email.");
     }
   };
 
-  //---------Reset Password-----/////
+  return { user, loading, handleLogout, sendResetPasswordEmail };
+};
 
-  /// ===== Read Table===///
-  const { allTodos, setArrayTodo } = useContext(TodosContext);
-  /// ===== Read Table===///
-
-  const ShowTodosCompleted = () => {
-    Navigate("/TodoList");
-    const newTodos = allTodos.filter((t) => {
-      return t.isCompleted;
-    });
-    setArrayTodo(newTodos);
-  };
-
-  const ShowTodosNotCompleted = () => {
-    Navigate("/TodoList");
-    const newTodos = allTodos.filter((t) => {
-      return !t.isCompleted;
-    });
-    setArrayTodo(newTodos);
-  };
-  const ShowTodosAll = () => {
-    Navigate("/TodoList");
-    setArrayTodo(allTodos);
-  };
-
-  /////----------change language --------////
-  const { t, i18n } = useTranslation();
-  const [local, setLocale] = useState("ar");
-  const handlelanguage = () => {
-    if (local == "en") {
-      setLocale("ar");
-      //moment.locale("ar");
-      i18n.changeLanguage("ar");
-    } else {
-      setLocale("en");
-      //  moment.locale("en");
-      i18n.changeLanguage("en");
-    }
-  };
-
+// ===================================================================
+// 2. Main Layout Component
+// ===================================================================
+export default function SideNavigation(props) {
   const { window } = props;
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { user, loading, handleLogout, sendResetPasswordEmail } = useAuth();
+
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [isClosing, setIsClosing] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
-  const handleDrawerClose = () => {
-    setIsClosing(true);
-    setMobileOpen(false);
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+
+  const handleLanguageToggle = () => {
+    const newLang = i18n.language === "en" ? "ar" : "en";
+    i18n.changeLanguage(newLang);
   };
 
-  const handleDrawerTransitionEnd = () => {
-    setIsClosing(false);
+  const handleConfirmResetPassword = () => {
+    sendResetPasswordEmail();
+    setResetDialogOpen(false);
   };
 
-  const handleDrawerToggle = () => {
-    if (!isClosing) {
-      setMobileOpen(!mobileOpen);
-    }
-  };
-
-  const drawer = (
+  // Drawer content JSX
+  const drawerContent = (
     <div>
-      <Toolbar sx={{ display: "flex", justifyContent: "center" }}>
-        {" "}
-        <Typography variant="h6">
-          {t("Welcome")} <br />
-          <b>{username}</b>
-        </Typography>{" "}
+      <Toolbar
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexDirection: "column",
+          py: 2,
+        }}
+      >
+        <Avatar sx={{ width: 64, height: 64, mb: 1, bgcolor: "primary.main" }}>
+          {user?.user_metadata?.full_name?.[0].toUpperCase()}
+        </Avatar>
+        <Typography variant="h6" noWrap>
+          {user?.user_metadata?.full_name}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          {user?.email}
+        </Typography>
       </Toolbar>
-
       <Divider />
-      <List sx={{ mb: 3 }}>
-        <ListItem>
-          <ListItemButton
-            onClick={() => {
-              Navigate("/profile");
-            }}
-          >
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate("/TodoList")}>
             <ListItemIcon>
-              <Person2SharpIcon />
+              <HomeIcon />
             </ListItemIcon>
-
-            <ListItemText>{t("Profile")}</ListItemText>
+            <ListItemText primary={t("Home")} />
           </ListItemButton>
         </ListItem>
-        <ListItem>
-          <ListItemButton
-            onClick={() => {
-              setShowUpdateDialog(true);
-            }}
-          >
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate("/profile")}>
+            <ListItemIcon>
+              <AccountCircleIcon />
+            </ListItemIcon>
+            <ListItemText primary={t("Profile")} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => setResetDialogOpen(true)}>
             <ListItemIcon>
               <PasswordIcon />
             </ListItemIcon>
-
-            <ListItemText>{t("Reset Password")}</ListItemText>
+            <ListItemText primary={t("Reset Password")} />
           </ListItemButton>
         </ListItem>
-        <ListItem>
-          <ListItemButton
-            onClick={() => {
-              Navigate("/AhoutThat");
-            }}
-          >
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => navigate("/AhoutThat")}>
             <ListItemIcon>
               <InfoIcon />
             </ListItemIcon>
-            <ListItemText>{t("About that")}</ListItemText>
-          </ListItemButton>
-        </ListItem>
-        <ListItem>
-          <ListItemButton>
-            <ListItemIcon>
-              <LogoutIcon />
-            </ListItemIcon>
-            <ListItemText onClick={handleLogout}>{t("Logout")}</ListItemText>
+            <ListItemText primary={t("About that")} />
           </ListItemButton>
         </ListItem>
       </List>
-      <Typography component="div" variant="h5">
-        {t("Todos")}
-      </Typography>
+      <Box sx={{ flexGrow: 1 }} />
       <Divider />
       <List>
-        <ListItem>
-          <ListItemButton
-            onClick={() => {
-              ShowTodosCompleted();
-            }}
-          >
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleLogout}>
             <ListItemIcon>
-              <CheckCircleIcon />
+              <LogoutIcon color="error" />
             </ListItemIcon>
-            <ListItemText>{t("Completed")}</ListItemText>
-          </ListItemButton>
-        </ListItem>
-        <ListItem>
-          <ListItemButton
-            onClick={() => {
-              ShowTodosNotCompleted();
-            }}
-          >
-            <ListItemIcon>
-              <DoNotDisturbIcon />
-            </ListItemIcon>
-            <ListItemText>{t("Not completed")}</ListItemText>
-          </ListItemButton>
-        </ListItem>
-        <ListItem>
-          <ListItemButton
-            onClick={() => {
-              ShowTodosAll();
-            }}
-          >
-            <ListItemIcon>
-              <DensitySmallIcon />
-            </ListItemIcon>
-            <ListItemText>{t("All")}</ListItemText>
+            <ListItemText primary={t("Logout")} sx={{ color: "error.main" }} />
           </ListItemButton>
         </ListItem>
       </List>
     </div>
   );
 
-  // Remove this const when copying and pasting into your project.
-  const container =
-    window !== undefined ? () => window().document.body : undefined;
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
-    <>
-      <Dialog
-        open={showUpdateDialog}
-        keepMounted
-        onClose={handleUpdateClose}
-        aria-describedby="alert-dialog-slide-description"
+    <Box
+      sx={{ display: "flex", justifyContent: "center", alignItems: "center" }}
+    >
+      <CssBaseline />
+      <AppBar
+        position="fixed"
+        elevation={1}
+        sx={{
+          width: { sm: `calc(100% - ${DRAWER_WIDTH}px)` },
+          display: "flex",
+        }}
       >
-        <DialogTitle sx={{ fontSize: 30 }}>
-          {"Do you want to change your password?"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText
-            id="alert-dialog-slide-description"
-            sx={{ fontSize: 20 }}
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={handleDrawerToggle}
+            sx={{ mr: 2, display: { sm: "none" } }}
           >
-            After confirmation, check your email.
+            <MenuIcon />
+          </IconButton>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{
+              flexGrow: 1,
+              alignItems: "flex-start",
+              display: "flex",
+            }}
+          >
+            {t("Todo App")}
+          </Typography>
+          <Tooltip title={t("Toggle Language")}>
+            <IconButton color="inherit" onClick={handleLanguageToggle}>
+              <LanguageIcon />
+            </IconButton>
+          </Tooltip>
+        </Toolbar>
+      </AppBar>
+      {/* chrom */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          display: { xs: "none", sm: "block" },
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: DRAWER_WIDTH,
+          },
+        }}
+        open
+      >
+        {drawerContent}
+      </Drawer>
+      {/* Mobile */}
+      <Drawer
+        variant="temporary"
+        open={mobileOpen}
+        onClose={handleDrawerToggle}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: "block", sm: "none" },
+          "& .MuiDrawer-paper": {
+            boxSizing: "border-box",
+            width: DRAWER_WIDTH,
+          },
+        }}
+      >
+        {drawerContent}
+      </Drawer>
+      <Box
+        component="main"
+        sx={{
+          flexGrow: 1,
+          ml: { sm: `${DRAWER_WIDTH}px`, xs: 0 },
+          backgroundColor: "#f9fafb",
+          minHeight: "100vh",
+        }}
+      >
+        <Toolbar />
+        <Outlet />
+      </Box>
+
+      {/* Reset Password Confirmation Dialog */}
+      <Dialog open={resetDialogOpen} onClose={() => setResetDialogOpen(false)}>
+        <DialogTitle fontWeight="bold">{t("Reset Password")}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {t(
+              "Are you sure you want to send a password reset link to your email?"
+            )}
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              setShowUpdateDialog(false);
-            }}
-            sx={{ fontSize: 20 }}
-          >
-            No
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={() => setResetDialogOpen(false)}>
+            {t("Cancel")}
           </Button>
           <Button
-            sx={{ fontSize: 20 }}
-            onClick={() => {
-              sendEmailToresetpassword(userEmail);
-            }}
+            onClick={handleConfirmResetPassword}
+            variant="contained"
+            autoFocus
           >
-            Yes
+            {t("Send Link")}
           </Button>
         </DialogActions>
       </Dialog>
-      ;
-      <Box sx={{ display: "flex" }}>
-        <CssBaseline />
-        <AppBar
-          position="fixed"
-          sx={{
-            width: { sm: `calc(100% - ${drawerWidth}px)` },
-            ml: { sm: `${drawerWidth}px` },
-          }}
-        >
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { sm: "none" } }}
-            >
-              <FormatListBulletedIcon />
-            </IconButton>
-            <IconButton onClick={handlelanguage}>
-              {" "}
-              <LanguageIcon />
-            </IconButton>
-            <IconButton
-              sx={{ ml: 2 }}
-              onClick={() => {
-                Navigate("/TodoList");
-              }}
-            >
-              <HomeIcon />
-            </IconButton>
-          </Toolbar>
-        </AppBar>
-        <Box
-          component="nav"
-          sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-          aria-label="mailbox folders"
-        >
-          {/* The implementation can be swapped with js to avoid SEO duplication of links. */}
-          <Drawer
-            container={container}
-            variant="temporary"
-            open={mobileOpen}
-            onTransitionEnd={handleDrawerTransitionEnd}
-            onClose={handleDrawerClose}
-            sx={{
-              display: { xs: "block", sm: "none" },
-              "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
-                width: drawerWidth,
-              },
-            }}
-            slotProps={{
-              root: {
-                keepMounted: true, // Better open performance on mobile.
-              },
-            }}
-          >
-            {drawer}
-          </Drawer>
-          <Drawer
-            variant="permanent"
-            sx={{
-              display: { xs: "none", sm: "block" },
-              "& .MuiDrawer-paper": {
-                boxSizing: "border-box",
-                width: drawerWidth,
-              },
-            }}
-            open
-          >
-            {drawer}
-          </Drawer>
-        </Box>
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            width: { sm: `calc(100% - ${drawerWidth}px)` },
-          }}
-        >
-          <Toolbar />
-
-          <Outlet />
-        </Box>
-      </Box>
-    </>
+    </Box>
   );
 }
-
-SideNavigation.propTypes = {
-  window: PropTypes.func,
-};
-
-export default SideNavigation;

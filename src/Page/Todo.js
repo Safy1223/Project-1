@@ -1,151 +1,104 @@
-import Box from "@mui/material/Box";
-import Grid from "@mui/material/Grid";
-import Typography from "@mui/material/Typography";
-import CheckIcon from "@mui/icons-material/Check";
-import IconButton from "@mui/material/IconButton";
-import Delete from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import Container from "@mui/material/Container";
+// src/Page/Todo.js
 
-import { useTranslation } from "react-i18next";
-//مكتبة لتنسيق التاريخ
+// استيراد المكونات الأساسية
+import { Typography, IconButton, Box, Stack } from "@mui/material";
+import { useState } from "react";
+
+// استيراد الأيقونات
+import CheckIcon from "@mui/icons-material/Check";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+
+// استيراد مكتبة تنسيق التاريخ
 import { format } from "date-fns";
 
+// استيراد مكتبة الترجمة
+import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 export function Todo({ item, CompleteTodo, DeleteTodo, UpdateTodo }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
-    <Container
-      maxWidth="lg"
+    <Box
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       sx={{
-        mr: 2,
-        direction: "rtl",
+        display: "flex",
+        alignItems: "center",
+        gap: 1.5,
+        p: 1.5,
+        borderRadius: 2,
+        backgroundColor: isHovered ? "#ffffff" : "#f7f8fa", // خلفية بيضاء عند المرور
+        boxShadow: isHovered ? "0px 4px 20px rgba(0, 0, 0, 0.06)" : "none",
+        transition:
+          "background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+        mt: 1,
       }}
     >
-      <Box
-        key={item.id}
-        component="section"
+      {/* أيقونة الإكمال */}
+      <IconButton
+        aria-label="complete task"
+        onClick={() => CompleteTodo(item.id, item.isCompleted)}
         sx={{
-          position: "relative",
-          display: "flex",
-          width: "100%",
-          p: 4,
-          marginTop: 3,
-          border: "1px dashed grey",
-          borderRadius: 2,
-          fontSize: 30,
-          color: "white",
-          bgcolor: "#1976d2",
+          backgroundColor: item.isCompleted ? "success.main" : "grey.200",
+          color: item.isCompleted ? "white" : "grey.700",
           "&:hover": {
-            bgcolor: "primary.dark",
-            transition: "all 0.2s",
-            boxShadow: "",
+            backgroundColor: item.isCompleted ? "success.dark" : "grey.300",
           },
         }}
       >
-        <Grid container spacing={1} sx={{ width: "100%" }}>
-          <Grid size={8}>
-            <Typography
-              component="div"
-              variant="h5"
-              textAlign="right"
-              sx={{
-                display: "flex",
-                justifyContent: "flex-start",
-                color: "white",
+        <CheckIcon />
+      </IconButton>
 
-                //     textDecoration: todo.icCompleted ? "line-through" : "none",
-              }}
-            >
-              {item.Title}
-            </Typography>
-            <Typography
-              variant="h6"
-              component="div"
-              textAlign="right"
-              sx={{ color: "white" }}
-            >
-              {item.Details}
-            </Typography>
-          </Grid>
-          <Grid
-            sx={{ mb: 2 }}
-            size={{ xs: 12, md: 4 }}
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <IconButton
-              size="large"
-              aria-label="CheckIcon"
-              sx={{
-                color: item.isCompleted ? "white" : "green",
-                background: item.isCompleted ? "green" : "white",
-                "&:hover": {
-                  bgcolor: "primary.light",
-                },
-              }}
-              onClick={() => {
-                CompleteTodo(item.id, item.isCompleted);
-              }}
-            >
-              {" "}
-              <CheckIcon />
-            </IconButton>
-            <IconButton
-              size="large"
-              aria-label="EditIcon"
-              sx={{
-                background: "white",
-                "&:hover": {
-                  bgcolor: "primary.light",
-                },
-              }}
-              color="primary"
-              onClick={() => {
-                UpdateTodo(item.id);
-              }}
-            >
-              {" "}
-              <EditIcon />
-            </IconButton>{" "}
-            <IconButton
-              size="large"
-              aria-label="Delete"
-              color="secondary"
-              sx={{
-                background: "white",
-                "&:hover": {
-                  bgcolor: "primary.light",
-                },
-              }}
-              onClick={
-                // handleCheckCilik(item.id, item.isCompleted);
-                () => {
-                  DeleteTodo(item.id);
-                }
-              }
-            >
-              {" "}
-              <Delete />
-            </IconButton>
-          </Grid>
-        </Grid>
+      {/* حاوية النصوص والتاريخ */}
+      <Stack sx={{ flexGrow: 1 }} spacing={0.2}>
         <Typography
-          gutterBottom
+          variant="h6"
           sx={{
-            display: "block",
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            px: 1,
-
-            fontSize: 12,
+            fontWeight: 500,
+            textDecoration: item.isCompleted ? "line-through" : "none",
+            color: item.isCompleted ? "text.disabled" : "text.primary",
           }}
         >
-          {t("Added on")}{" "}
-          {format(new Date(item.TodoCreateTime), "yyyy-MM-dd HH:mm:ss")}
+          {item.Title}
         </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {item.Details}
+        </Typography>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ pt: 0.5, direction: i18next.language === "ar" ? "rtl" : "ltr" }}
+        >
+          {t("Added on")} {format(new Date(item.TodoCreateTime), "MMM d, yyyy")}
+        </Typography>
+      </Stack>
+
+      {/* أزرار التحكم (تظهر عند المرور) */}
+      <Box
+        sx={{
+          opacity: isHovered ? 1 : 0, // التحكم بالظهور
+          transition: "opacity 0.2s ease-in-out",
+        }}
+      >
+        <IconButton
+          aria-label="edit task"
+          size="small"
+          onClick={() => UpdateTodo(item.id)}
+          color="primary"
+        >
+          <EditIcon />
+        </IconButton>
+        <IconButton
+          aria-label="delete task"
+          size="small"
+          onClick={() => DeleteTodo(item.id)}
+          color="error"
+        >
+          <DeleteIcon />
+        </IconButton>
       </Box>
-    </Container>
+    </Box>
   );
 }

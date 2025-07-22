@@ -1,16 +1,23 @@
-import FormControl from "@mui/material/FormControl";
-import Input from "@mui/material/Input";
-import Button from "@mui/material/Button";
-import { Card } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import supabase from "../config/supabaseClient";
+
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  InputAdornment,
+  IconButton,
+  Stack,
+  Avatar,
+} from "@mui/material";
+
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import InputLabel from "@mui/material/InputLabel";
-import { useState, useEffect } from "react";
-import Typography from "@mui/material/Typography";
-import supabase from "../config/supabaseClient";
-import { useNavigate } from "react-router-dom";
+import LockResetIcon from "@mui/icons-material/LockReset";
 export default function ResetPassword() {
   const Navigate = useNavigate();
   const [ErrorPassword, SetErrorPassword] = useState({
@@ -21,10 +28,11 @@ export default function ResetPassword() {
     password: "",
     ConfirmPassword: "",
   });
+
   useEffect(() => {
-    if (Inputsign.password == "" || Inputsign.ConfirmPassword == "") {
+    if (Inputsign.password === "" || Inputsign.ConfirmPassword === "") {
       SetErrorPassword({ ErrorPass: "", IscompleteInputs: true });
-    } else if (Inputsign.password != Inputsign.ConfirmPassword) {
+    } else if (Inputsign.password !== Inputsign.ConfirmPassword) {
       SetErrorPassword({
         ErrorPass: "Password does not match",
         IscompleteInputs: true,
@@ -41,7 +49,7 @@ export default function ResetPassword() {
     if (error) {
       alert(error.message);
     } else {
-      alert("Done");
+      alert("Password updated successfully! You will be logged out.");
       await supabase.auth.signOut();
       Navigate("/login");
     }
@@ -49,107 +57,110 @@ export default function ResetPassword() {
 
   const [showPassword, setShowPassword] = useState(false);
   const handleClickShowPassword = () => setShowPassword((show) => !show);
+
   return (
-    <>
-      <div>
-        <Typography variant="h4">
-          <b>Change Password</b>
-        </Typography>
-      </div>
-      <Card
+    <Box sx={{ bgcolor: "#f4f6f8", minHeight: "100vh" }}>
+      <Container
+        component="main"
+        maxWidth="xs"
         sx={{
-          background: "#ffffff",
-          color: "black",
-          boxShadow: 8,
-          width: 400,
-          mx: "auto", // margin left & right
-          my: 6, // margin top & bottom
-          py: 9, // padding top & bottom
-          px: 2, // padding left & right
           display: "flex",
           flexDirection: "column",
-          gap: 4,
-          borderRadius: "12px",
-          maxWidth: 545,
-          height: 350,
+          justifyContent: "center",
+          minHeight: "100vh",
+          py: 4,
         }}
-        variant="outlined"
       >
-        <FormControl>
-          <InputLabel htmlFor="standard-adornment-password">
-            Password
-          </InputLabel>
-          <Input
-            id="standard-adornment-password"
-            type={showPassword ? "text" : "password"}
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label={
-                    showPassword ? "hide the password" : "display the password"
-                  }
-                  onClick={handleClickShowPassword}
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            }
-            value={Inputsign.password}
-            onChange={(event) => {
-              setInputSign({ ...Inputsign, password: event.target.value });
-            }}
-          />
-        </FormControl>
-        <FormControl>
-          <InputLabel htmlFor="standard-adornment-password">
-            Confirm Password
-          </InputLabel>
-          <Input
-            id="standard-adornment-password"
-            type={showPassword ? "text" : "password"}
-            endAdornment={
-              <InputAdornment position="end">
-                <IconButton
-                  aria-label={
-                    showPassword ? "hide the password" : "display the password"
-                  }
-                  onClick={handleClickShowPassword}
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            }
-            value={Inputsign.ConfirmPassword}
-            onChange={(event) => {
-              setInputSign({
-                ...Inputsign,
-                ConfirmPassword: event.target.value,
-              });
-            }}
-          />
-          <InputLabel
-            color="error"
-            sx={{
-              mt: 7.5,
-            }}
-          >
-            {ErrorPassword.ErrorPass}
-          </InputLabel>
-        </FormControl>
-
-        <Button
+        <Paper
+          elevation={6}
           sx={{
-            mt: 1,
-            fontSize: "15px " /* margin top */,
-            bgcolor: "primary",
+            p: { xs: 3, sm: 4 },
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            borderRadius: 2,
           }}
-          variant="contained"
-          onClick={handleEditPassword}
-          disabled={ErrorPassword.IscompleteInputs}
         >
-          Change
-        </Button>
-      </Card>
-    </>
+          <Avatar sx={{ m: 1, bgcolor: "primary.main", width: 56, height: 56 }}>
+            <LockResetIcon fontSize="large" />
+          </Avatar>
+
+          <Typography
+            component="h1"
+            variant="h5"
+            fontWeight="bold"
+            sx={{ mt: 1 }}
+          >
+            Reset Password
+          </Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            Enter your new password below.
+          </Typography>
+
+          <Stack spacing={2.5} sx={{ width: "100%" }}>
+            <TextField
+              required
+              fullWidth
+              label="New Password"
+              type={showPassword ? "text" : "password"}
+              value={Inputsign.password}
+              onChange={(event) => {
+                setInputSign({ ...Inputsign, password: event.target.value });
+              }}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleClickShowPassword} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <TextField
+              required
+              fullWidth
+              label="Confirm New Password"
+              type={showPassword ? "text" : "password"}
+              value={Inputsign.ConfirmPassword}
+              onChange={(event) => {
+                setInputSign({
+                  ...Inputsign,
+                  ConfirmPassword: event.target.value,
+                });
+              }}
+              error={!!ErrorPassword.ErrorPass}
+              helperText={ErrorPassword.ErrorPass}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleClickShowPassword} edge="end">
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+          </Stack>
+
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{
+              mt: 3,
+              mb: 2,
+              py: 1.5,
+              fontSize: "1rem",
+              fontWeight: "bold",
+              boxShadow: "0 4px 14px 0 rgba(0, 118, 255, 0.39)",
+            }}
+            onClick={handleEditPassword}
+            disabled={ErrorPassword.IscompleteInputs}
+          >
+            Change Password
+          </Button>
+        </Paper>
+      </Container>
+    </Box>
   );
 }

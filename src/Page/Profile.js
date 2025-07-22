@@ -8,6 +8,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { IconButton } from "@mui/material";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import { CircularProgress, Box } from "@mui/material"; //  <-- 1. استيراد CircularProgress و Box
 
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -15,7 +16,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import { useTranslation } from "react-i18next";
 import i18next from "i18next";
 export default function Profile() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const [editProfile, setEditProfile] = useState({
     editFull_name: "",
@@ -28,9 +29,10 @@ export default function Profile() {
     email: "",
     Birth_of_day: "",
   });
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const getUser = async () => {
+      setLoading(true);
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -45,6 +47,7 @@ export default function Profile() {
           editBirth_of_day: user.user_metadata.Birth,
         });
       }
+      setLoading(false);
     };
     getUser();
   }, []);
@@ -70,6 +73,21 @@ export default function Profile() {
 
     console.log(data);
   }
+  if (loading) {
+    return (
+      <Container
+        maxWidth="md"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "80vh",
+        }}
+      >
+        <CircularProgress />
+      </Container>
+    );
+  }
   return (
     <Container
       maxWidth="md"
@@ -83,7 +101,7 @@ export default function Profile() {
         height: "60vh",
       }}
     >
-      <Typography variant="h3" sx={{ mb: 4 }}>
+      <Typography variant="h3" sx={{ mb: 4, mt: 3 }}>
         {t("My Profile")}
       </Typography>
       <Card

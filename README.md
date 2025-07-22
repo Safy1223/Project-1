@@ -1,70 +1,47 @@
-# Getting Started with Create React App
+# تطبيق مهام متكامل (Full-Stack To-Do App)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+تطبيق ويب متكامل لإدارة المهام تم بناؤه باستخدام React.js و Supabase. يتيح للمستخدمين تسجيل حسابات آمنة، وإدارة مهامهم اليومية، وتحديث ملفاتهم الشخصية.
 
-## Available Scripts
+**[رابط مباشر للتطبيق](https://spiffy-sherbet-bf6b9b.netlify.app/)**
 
-In the project directory, you can run:
+## الميزات الرئيسية
 
-### `npm start`
+- **مصادقة كاملة:** تسجيل مستخدم جديد، تسجيل الدخول، وتسجيل الخروج.
+- **إعادة تعيين كلمة المرور:** إمكانية إرسال رابط لإعادة تعيين كلمة المرور إلى بريد المستخدم.
+- **إدارة المهام (CRUD):** إضافة، تعديل، حذف، ووضع علامة "مكتمل" على المهام.
+- **إدارة الملف الشخصي:** تحديث اسم المستخدم وصورة الملف الشخصي.
+- **واجهة مستخدم تفاعلية:** تصميم نظيف باستخدام Material-UI.
+- **دعم متعدد اللغات:** استخدام `i18next` لتهيئة التطبيق لدعم لغات متعددة.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## التقنيات المستخدمة
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **الواجهة الأمامية:** React.js, React Router, Context API
+- **الواجهة الخلفية وقاعدة البيانات:** Supabase (Authentication & Database)
+- **مكتبة التصميم:** Material-UI (MUI)
+- **الترجمة:** i18next
+- **النشر:** Netlify
 
-### `npm test`
+## كيفية تشغيل المشروع محليًا
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1.  **نسخ المستودع:**
 
-### `npm run build`
+    ```bash
+    git clone https://github.com/Safy1223/Project-1.git
+    cd Project-1
+    ```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+2.  **تثبيت الاعتماديات:**
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+    ```bash
+    npm install
+    ```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+3.  **إعداد متغيرات البيئة:** - أنشئ ملف `.env` في جذر المشروع. - أضف مفاتيح Supabase الخاصة بك:
+    `REACT_APP_SUPABASE_URL=https://lukbskkkvrtwyzzpclbc.supabase.co
+REACT_APP_SUPABASE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx1a2Jza2trdnJ0d3l6enBjbGJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg3Nzg5MTcsImV4cCI6MjA2NDM1NDkxN30.hbPKPx-a4Eq-Hx_-f3efYG6L1MRTvpwgq5vZX4DsQSo
+     `
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+4.  **تشغيل المشروع:**
+    ```bash
+    npm start
+    ```
