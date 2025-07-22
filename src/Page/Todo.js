@@ -56,6 +56,7 @@ export function Todo({ item, CompleteTodo, DeleteTodo, UpdateTodo }) {
         <Typography
           variant="h6"
           sx={{
+            direction: "rtl",
             fontWeight: 500,
             textDecoration: item.isCompleted ? "line-through" : "none",
             color: item.isCompleted ? "text.disabled" : "text.primary",
@@ -63,7 +64,11 @@ export function Todo({ item, CompleteTodo, DeleteTodo, UpdateTodo }) {
         >
           {item.Title}
         </Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ direction: "rtl" }}
+        >
           {item.Details}
         </Typography>
         <Typography

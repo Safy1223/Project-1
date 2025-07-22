@@ -5,7 +5,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import EditIcon from "@mui/icons-material/Edit";
-import { IconButton } from "@mui/material";
+import { IconButton, Stack } from "@mui/material";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import { CircularProgress, Box } from "@mui/material"; //  <-- 1. استيراد CircularProgress و Box
@@ -93,142 +93,145 @@ export default function Profile() {
       maxWidth="md"
       sx={{
         direction: i18next.language === "ar" ? "rtl" : "ltr",
-
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "60vh",
+        py: 4,
       }}
     >
-      <Typography variant="h3" sx={{ mb: 4, mt: 3 }}>
+      <Typography
+        variant="h3"
+        component="h1"
+        textAlign="center"
+        sx={{
+          mb: 4,
+          fontSize: { xs: "2rem", md: "3rem" },
+        }}
+      >
         {t("My Profile")}
       </Typography>
       <Card
         sx={{
-          boxShadow: 10,
-          padding: 5,
-          display: "flex",
+          boxShadow: { xs: 0, md: 10 }, //  <-- تعديل: إزالة الظل على الموبايل لمظهر أنظف
+          p: { xs: 2, sm: 3, md: 4 }, //  <-- تعديل: جعل الـ padding متجاوبًا
+          width: "100%", //  <-- تعديل: جعل البطاقة تأخذ العرض الكامل دائمًا
+          maxWidth: "700px", //  <-- تعديل: تحديد أقصى عرض للبطاقة على الشاشات الكبيرة
+          mx: "auto", //  <-- تعديل: توسيط البطاقة
         }}
       >
         <CardContent>
-          <Typography sx={{ color: "text.secondary", mb: 7, fontSize: 24 }}>
-            {t("Email")}: <b> {profile.email}</b>
-          </Typography>
-          {editName ? (
-            <>
-              <TextField
-                id="standard-basic"
-                label={t("Full Name")}
-                variant="standard"
-                value={editProfile.editFull_name}
-                onChange={(e) =>
-                  setEditProfile({
-                    ...editProfile,
-                    editFull_name: e.target.value,
-                  })
-                }
-              />
-              <Button
-                sx={{ m: 2 }}
-                color="success"
-                variant="outlined"
-                onClick={handleSave}
-              >
-                <SaveIcon /> {t("Save")}
-              </Button>
-              <Button
-                sx={{ m: 1 }}
-                variant="outlined"
-                onClick={() => setEditName(false)}
-              >
-                <CancelIcon /> {t("Cancel")}
-              </Button>
-            </>
-          ) : (
-            <Typography
-              gutterBottom
-              sx={{
-                color: "text.secondary",
-                fontSize: 24,
-
-                mb: 4,
-              }}
-            >
-              {t("Full Name")}: <b>{profile.full_name} </b>{" "}
-              <IconButton
-                size="large"
-                aria-label="EditIcon"
+          <Stack spacing={4}>
+            <Box>
+              <Typography
                 sx={{
-                  background: "white",
-                  "&:hover": {
-                    bgcolor: "primary.light",
-                  },
+                  color: "text.secondary",
+                  fontSize: { xs: 16, md: 20 },
+                  wordBreak: "break-word",
                 }}
-                color="primary"
-                onClick={() => {
-                  setEditName(true);
-                }}
-                disabled={editBirth}
               >
-                {" "}
-                <EditIcon />
-              </IconButton>
-            </Typography>
-          )}
+                {t("Email")}:{" "}
+                <Typography
+                  component="b"
+                  sx={{ color: "text.primary", fontWeight: "bold" }}
+                >
+                  {profile.email}
+                </Typography>
+              </Typography>
+            </Box>
 
-          {editBirth ? (
-            <>
-              <TextField
-                id="standard-basic"
-                label={t("Birth of day")}
-                variant="standard"
-                value={editProfile.editBirth_of_day}
-                onChange={(e) =>
-                  setEditProfile({
-                    ...editProfile,
-                    editBirth_of_day: e.target.value,
-                  })
-                }
-              />
-              <Button
-                sx={{ m: 2 }}
-                color="success"
-                variant="outlined"
-                onClick={handleSave}
-              >
-                <SaveIcon /> {t("Save")}
-              </Button>
-              <Button
-                sx={{ m: 1 }}
-                variant="outlined"
-                onClick={() => SeteditBirth(false)}
-              >
-                <CancelIcon /> {t("Cancel")}
-              </Button>
-            </>
-          ) : (
-            <Typography sx={{ color: "text.secondary", mb: 3, fontSize: 24 }}>
-              {t("Birth of day")}: <b>{profile.Birth_of_day} </b>
-              <IconButton
-                size="large"
-                aria-label="EditIcon"
-                sx={{
-                  background: "white",
-                  "&:hover": {
-                    bgcolor: "primary.light",
-                  },
-                }}
-                color="primary"
-                onClick={() => {
-                  SeteditBirth(true);
-                }}
-                disabled={editName}
-              >
-                <EditIcon />
-              </IconButton>
-            </Typography>
-          )}
+            <Box>
+              {editName ? (
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <TextField
+                    fullWidth
+                    label={t("Full Name")}
+                    variant="standard"
+                    value={editProfile.editFull_name}
+                    onChange={(e) =>
+                      setEditProfile({
+                        ...editProfile,
+                        editFull_name: e.target.value,
+                      })
+                    }
+                  />
+                  <IconButton color="success" onClick={handleSave}>
+                    <SaveIcon />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => setEditName(false)}>
+                    <CancelIcon />
+                  </IconButton>
+                </Stack>
+              ) : (
+                <Typography
+                  sx={{
+                    color: "text.secondary",
+                    fontSize: { xs: 16, md: 20 },
+                  }}
+                >
+                  {t("Full Name")}:{" "}
+                  <Typography
+                    component="b"
+                    sx={{ color: "text.primary", fontWeight: "bold" }}
+                  >
+                    {profile.full_name}
+                  </Typography>
+                  <IconButton
+                    color="primary"
+                    onClick={() => setEditName(true)}
+                    disabled={editBirth}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Typography>
+              )}
+            </Box>
+
+            <Box>
+              {editBirth ? (
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <TextField
+                    fullWidth
+                    label={t("Birth of day")}
+                    type="date" //  <-- تعديل: استخدام type="date" أفضل
+                    InputLabelProps={{ shrink: true }}
+                    variant="standard"
+                    value={editProfile.editBirth_of_day}
+                    onChange={(e) =>
+                      setEditProfile({
+                        ...editProfile,
+                        editBirth_of_day: e.target.value,
+                      })
+                    }
+                  />
+                  <IconButton color="success" onClick={handleSave}>
+                    <SaveIcon />
+                  </IconButton>
+                  <IconButton color="error" onClick={() => SeteditBirth(false)}>
+                    <CancelIcon />
+                  </IconButton>
+                </Stack>
+              ) : (
+                <Typography
+                  sx={{
+                    color: "text.secondary",
+                    fontSize: { xs: 16, md: 20 },
+                  }}
+                >
+                  {t("Birth of day")}:{" "}
+                  <Typography
+                    component="b"
+                    sx={{ color: "text.primary", fontWeight: "bold" }}
+                  >
+                    {profile.Birth_of_day}
+                  </Typography>
+                  <IconButton
+                    color="primary"
+                    onClick={() => SeteditBirth(true)}
+                    disabled={editName}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </Typography>
+              )}
+            </Box>
+          </Stack>
         </CardContent>
       </Card>
     </Container>

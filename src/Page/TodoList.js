@@ -21,7 +21,8 @@ import {
 import { useTranslation } from "react-i18next";
 
 function DeleteConfirmationDialog({ open, onClose, onConfirm }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle fontWeight="bold">{t("Confirm Deletion")}</DialogTitle>
@@ -81,6 +82,7 @@ function UpdateTodoDialog({ open, onClose, onConfirm, todo, setTodo }) {
 }
 export default function TodoList() {
   const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
   /// ===== Read Table===///
   const { arrayTodo, setArrayTodo, setAllTodos } = useContext(TodosContext);
   const [todoToDelete, setTodoToDelete] = useState(null);
@@ -139,7 +141,12 @@ export default function TodoList() {
   //////// Update Table  ///////
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Container
+      maxWidth="xl"
+      sx={{
+        py: 4,
+      }}
+    >
       <AddTodos />
       <Divider sx={{ my: 4 }} />
       <Box>
@@ -184,32 +191,33 @@ export default function TodoList() {
             </Button>
           </ButtonGroup>
         </Box>
-
-        {/* قم بفلترة المصفوفة قبل عرضها */}
-        {arrayTodo && arrayTodo.length > 0 ? (
-          arrayTodo
-            .filter((todo) => {
-              if (currentFilter === "completed") return todo.isCompleted;
-              if (currentFilter === "not_completed") return !todo.isCompleted;
-              return true; // فلتر 'all'
-            })
-            .map((todo) => (
-              <Todo
-                key={todo.id}
-                item={todo}
-                CompleteTodo={handleComplete}
-                DeleteTodo={() => setTodoToDelete(todo)}
-                UpdateTodo={() => setTodoToUpdate({ ...todo })}
-              />
-            ))
-        ) : (
-          <Typography
-            color="text.secondary"
-            sx={{ mt: 3, textAlign: "center" }}
-          >
-            {t("Your task list is empty. Add a new task to get started!")}
-          </Typography>
-        )}
+        <Stack sx={{ direction: isRtl ? "rtl" : "ltr" }}>
+          {/* قم بفلترة المصفوفة قبل عرضها */}
+          {arrayTodo && arrayTodo.length > 0 ? (
+            arrayTodo
+              .filter((todo) => {
+                if (currentFilter === "completed") return todo.isCompleted;
+                if (currentFilter === "not_completed") return !todo.isCompleted;
+                return true; // فلتر 'all'
+              })
+              .map((todo) => (
+                <Todo
+                  key={todo.id}
+                  item={todo}
+                  CompleteTodo={handleComplete}
+                  DeleteTodo={() => setTodoToDelete(todo)}
+                  UpdateTodo={() => setTodoToUpdate({ ...todo })}
+                />
+              ))
+          ) : (
+            <Typography
+              color="text.secondary"
+              sx={{ mt: 3, textAlign: "center" }}
+            >
+              {t("Your task list is empty. Add a new task to get started!")}
+            </Typography>
+          )}
+        </Stack>
       </Box>
 
       <DeleteConfirmationDialog

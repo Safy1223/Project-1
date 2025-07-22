@@ -12,11 +12,13 @@ import {
   CircularProgress,
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-
 import { useTranslation } from "react-i18next";
 
 export default function AddTodos() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isRtl = i18n.dir() === "rtl";
+
+  // --- لا تغيير في المنطق البرمجي ---
   const { arrayTodo, setArrayTodo, allTodos, setAllTodos } =
     useContext(TodosContext);
   const [title, setTitle] = useState("");
@@ -27,8 +29,6 @@ export default function AddTodos() {
     message: "",
     severity: "success",
   });
-
-  ///----- Add Todo -------/////
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,17 +58,15 @@ export default function AddTodos() {
         severity: "success",
         open: true,
       });
-      // تحديث الحالة في السياق (Context)
       const updatedArray = [...arrayTodo, ...newTodos];
       setArrayTodo(updatedArray);
       setAllTodos(updatedArray);
-      // إعادة تعيين حقول الإدخال
       setTitle("");
       setDetails("");
     }
   };
+
   const handleCloseNotification = (event, reason) => {
-    //منع الإغلاق إذا كان المستخدم قد نقر خارج الإشعار، مما يعني أنه ربما كان يريد إبقاءه مفتوحًا.
     if (reason === "clickaway") {
       return;
     }
@@ -88,7 +86,16 @@ export default function AddTodos() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={loading}
+          sx={{
+            // تطبيق الاتجاه على الحقل نفسه
+            direction: isRtl ? "rtl" : "ltr",
+            // التأكد من أن النص داخل الحقل يبدأ من الاتجاه الصحيح
+            "& .MuiInputBase-input": {
+              textAlign: isRtl ? "right" : "left",
+            },
+          }}
         />
+
         <TextField
           label={t("Details")}
           variant="filled"
@@ -98,6 +105,14 @@ export default function AddTodos() {
           value={details}
           onChange={(e) => setDetails(e.target.value)}
           disabled={loading}
+          sx={{
+            // تطبيق الاتجاه على الحقل نفسه
+            direction: isRtl ? "rtl" : "ltr",
+            // التأكد من أن النص داخل الحقل يبدأ من الاتجاه الصحيح
+            "& .MuiInputBase-input": {
+              textAlign: isRtl ? "right" : "left",
+            },
+          }}
         />
         <Button
           type="submit"
@@ -105,11 +120,20 @@ export default function AddTodos() {
           color="primary"
           size="large"
           startIcon={
-            loading ? (
+            !isRtl &&
+            (loading ? (
               <CircularProgress size={20} color="inherit" />
             ) : (
               <AddCircleOutlineIcon />
-            )
+            ))
+          }
+          endIcon={
+            isRtl &&
+            (loading ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              <AddCircleOutlineIcon />
+            ))
           }
           disabled={loading}
         >
